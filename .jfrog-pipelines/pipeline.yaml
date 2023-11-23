@@ -34,8 +34,12 @@ pipelines:
           integrations:
             - name: registry                            # <-- replace with your artifactory integration
         execution:
-          onStart: 
-              - update_run_description "Add custom text for every run. Example - Build and push Docker image to Artifactory."
+          onStart:
+            - update_commit_status source_repo_pondpulse --message "starting...Building the container Image tompaz.jfrog.io/docker/pondpulse" --context "$step_name"
+          onFailure:
+            - update_commit_status source_repo_pondpulse --message "Failed! to build tompaz.jfrog.io/docker/pondpulse" --context "$step_name"
+          onSuccess:
+            - update_commit_status source_repo_pondpulse --message "Succeeded :-) build tompaz.jfrog.io/docker/pondpulse" --context "$step_name"
 
       - name: docker_push
         type: DockerPush
@@ -48,3 +52,8 @@ pipelines:
             - name: docker_build
           outputResources:
             - name: artifact_repo_pondpulse
+        execution:
+          onFailure:
+            - update_commit_status source_repo_pondpulse --message "Failed! couldnt upload image to tompaz.jfrog.io/docker/pondpulse" --context "$step_name"
+          onSuccess:
+            - update_commit_status source_repo_pondpulse --message "Succeeded :-) image tompaz.jfrog.io/docker/pondpulse succesfully pushed" --context "$step_name"
