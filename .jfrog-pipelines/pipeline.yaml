@@ -1,0 +1,50 @@
+resources:
+  - name: source-repo
+    type: GitRepo
+    configuration:
+      gitProvider: git                     # <-- replace with your integration
+      path: tpaz1/pondpulse  # <-- replace with your repository name
+      branches:
+        include: main
+      buildOn:
+        commit: true
+
+  - name: artifact-repo
+    type: Image
+    configuration:
+      registry: registry                               # <-- replace with your artifactory integration
+      sourceRepository: docker             # <-- required if registry is Artifactory
+      imageName: tompaz.jfrog.io/docker/pondpulse  # < -- replace with your image path and name
+      imageTag: latest
+      autoPull: true
+
+pipelines:
+  - name: Docker_Quickstart 
+    steps:
+      - name: docker_build
+        type: DockerBuild
+        configuration:
+          affinityGroup: build_group
+          dockerFileLocation: .
+          dockerFileName: Dockerfile
+          dockerImageName: tompaz.jfrog.io/docker/pondpulse  # replace with your image path and name
+          dockerImageTag: ${run_number}
+          inputResources:
+            - name: source-repo
+          integrations:
+            - name: registry                            # <-- replace with your artifactory integration
+        execution:
+          onStart: 
+              - update_run_description "Add custom text for every run. Example - Build and push Docker image to Artifactory."
+
+      - name: docker_push
+        type: DockerPush
+        configuration:
+          affinityGroup: build_group
+          targetRepository: docker
+          integrations:
+            - name: registry                            # <-- replace with your artifactory integration
+          inputSteps:
+            - name: docker_build
+          outputResources:
+            - name: artifact-repo
