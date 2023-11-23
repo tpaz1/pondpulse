@@ -19,7 +19,7 @@ resources:
       autoPull: true
 
 pipelines:
-  - name: Docker_Build_Push 
+  - name: Docker_Build_Push_pondpulse
     steps:
       - name: docker_build
         type: DockerBuild
