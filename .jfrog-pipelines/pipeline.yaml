@@ -1,5 +1,5 @@
 resources:
-  - name: source_repo
+  - name: source_repo_pondpulse
     type: GitRepo
     configuration:
       gitProvider: git                     # <-- replace with your integration
@@ -9,7 +9,7 @@ resources:
       buildOn:
         commit: true
 
-  - name: artifact_repo
+  - name: artifact_repo_pondpulse
     type: Image
     configuration:
       registry: registry                               # <-- replace with your artifactory integration
@@ -30,7 +30,7 @@ pipelines:
           dockerImageName: tompaz.jfrog.io/docker/pondpulse  # replace with your image path and name
           dockerImageTag: ${run_number}
           inputResources:
-            - name: source_repo
+            - name: source_repo_pondpulse
           integrations:
             - name: registry                            # <-- replace with your artifactory integration
         execution:
@@ -47,4 +47,4 @@ pipelines:
           inputSteps:
             - name: docker_build
           outputResources:
-            - name: artifact_repo
+            - name: artifact_repo_pondpulse
